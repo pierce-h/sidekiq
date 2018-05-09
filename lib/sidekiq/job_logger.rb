@@ -3,7 +3,7 @@ module Sidekiq
   class JobLogger
 
     def call(item, queue)
-      logger.tagged(log_payload(item)) do
+      logger.tagged(item) do
         begin
           start = Time.now
           logger.info('start')

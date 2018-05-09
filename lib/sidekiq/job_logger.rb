@@ -20,7 +20,7 @@ module Sidekiq
 
     def log_payload(item)
       {
-        class_name: item['wrapped'],
+        class_name: item['class'],
         jid: item['jid']
       }
     end

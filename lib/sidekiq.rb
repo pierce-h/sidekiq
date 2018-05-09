@@ -87,6 +87,12 @@ module Sidekiq
     defined?(Sidekiq::CLI)
   end
 
+  def has_backend?
+    self.redis{ |c| c.info.present? }
+  rescue
+    false
+  end
+
   def self.redis
     raise ArgumentError, "requires a block" unless block_given?
     redis_pool.with do |conn|

@@ -6,10 +6,14 @@ module Sidekiq
 
     class Logger
       def call(ex, ctxHash)
-        puts "#" * 100
-        puts ctxHash
-        Sidekiq.logger.tagged(ctxHash.dig('job')) do
-          Sidekiq.logger.warn(ctxHash) if !ctxHash.empty?
+        if !ctxHash.dig(:job, 'class').empty?
+          Sidekiq.logger.tagged(class_name: ctxHash.dig(:job, 'class'), jid: ctxHash.dig(:job, 'jid')) do
+            Sidekiq.logger.warn(Sidekiq.dump_json(ctxHash)) if !ctxHash.empty?
+            Sidekiq.logger.warn("#{ex.class.name}: #{ex.message}")
+            Sidekiq.logger.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
+          end
+        else
+          Sidekiq.logger.warn(Sidekiq.dump_json(ctxHash)) if !ctxHash.empty?
           Sidekiq.logger.warn("#{ex.class.name}: #{ex.message}")
           Sidekiq.logger.warn(ex.backtrace.join("\n")) unless ex.backtrace.nil?
         end
@@ -23,9 +27,17 @@ module Sidekiq
         begin
           handler.call(ex, ctxHash)
         rescue => ex
-          Sidekiq.logger.error "!!! ERROR HANDLER THREW AN ERROR !!!"
-          Sidekiq.logger.error ex
-          Sidekiq.logger.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+          if !ctxHash.dig(:job, 'class').empty?
+            Sidekiq.logger.tagged(class_name: ctxHash.dig(:job, 'class'), jid: ctxHash.dig(:job, 'jid')) do
+              Sidekiq.logger.error "!!! ERROR HANDLER THREW AN ERROR !!!"
+              Sidekiq.logger.error ex
+              Sidekiq.logger.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+            end
+          else
+            Sidekiq.logger.error "!!! ERROR HANDLER THREW AN ERROR !!!"
+            Sidekiq.logger.error ex
+            Sidekiq.logger.error ex.backtrace.join("\n") unless ex.backtrace.nil?
+          end
         end
       end
     end

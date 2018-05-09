@@ -87,7 +87,7 @@ module Sidekiq
     defined?(Sidekiq::CLI)
   end
 
-  def has_backend?
+  def self.has_backend?
     self.redis{ |c| c.info.present? }
   rescue
     false

@@ -2,6 +2,7 @@
 require 'time'
 require 'logger'
 require 'fcntl'
+require 'semantic_logger'
 
 module Sidekiq
   module Logging
@@ -51,9 +52,9 @@ module Sidekiq
     end
 
     def self.initialize_logger(log_target = STDOUT)
-      oldlogger = defined?(@logger) ? @logger : nil
-      @logger = Logger.new(log_target)
-      @logger.level = Logger::INFO
+      oldlogger         = defined?(@logger) ? @logger : nil
+      @logger           = SemanticLogger[Sidekiq]
+      @logger.level     = Logger::INFO
       @logger.formatter = ENV['DYNO'] ? WithoutTimestamp.new : Pretty.new
       oldlogger.close if oldlogger && !$TESTING # don't want to close testing's STDOUT logging
       @logger
@@ -63,9 +64,9 @@ module Sidekiq
       defined?(@logger) ? @logger : initialize_logger
     end
 
-    def self.logger=(log)
-      @logger = (log ? log : Logger.new(File::NULL))
-    end
+    # def self.logger=(log)
+    #   @logger = (log ? log : SemanticLogger[Sidekiq])
+    # end
 
     # This reopens ALL logfiles in the process that have been rotated
     # using logrotate(8) (without copytruncate) or similar tools.

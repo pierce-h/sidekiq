@@ -185,9 +185,10 @@ module Sidekiq
   def self.logger
     Sidekiq::Logging.logger
   end
-  def self.logger=(log)
-    Sidekiq::Logging.logger = log
-  end
+
+  # def self.logger=(log)
+  #   Sidekiq::Logging.logger = log
+  # end
 
   # How frequently Redis should be checked by a random Sidekiq process for
   # scheduled and retriable jobs. Each individual process will take turns by

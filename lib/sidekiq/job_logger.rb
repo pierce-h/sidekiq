@@ -4,7 +4,7 @@ module Sidekiq
 
     def call(item, queue)
       start = Time.now
-      logger.info("start")
+      logger.info("start your engines")
       yield
       logger.info("done: #{elapsed(start)} sec")
     rescue Exception
